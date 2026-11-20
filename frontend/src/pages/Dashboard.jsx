@@ -1,0 +1,21 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowDownLeft, ArrowUpRight, CreditCard, Plus, Users, WalletCards } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { accountService } from '../services/accountService'
+import { transactionService } from '../services/transactionService'
+import { Card, EmptyState, Loading, PageTitle, StatusBadge } from '../components/UI'
+import { dateTime, money } from '../utils/format'
+
+export default function Dashboard(){
+ const {user}=useAuth(); const [accounts,setAccounts]=useState([]); const [transactions,setTransactions]=useState([]); const [loading,setLoading]=useState(true)
+ useEffect(()=>{Promise.all([accountService.list(),transactionService.list({page_size:5})]).then(([a,t])=>{setAccounts(a);setTransactions(t.data)}).finally(()=>setLoading(false))},[])
+ if(loading)return <Loading label="Loading dashboard..." />
+ const total=accounts.reduce((sum,a)=>sum+Number(a.balance||0),0)
+ return <><PageTitle title={`Welcome back, ${user?.full_name?.split(' ')[0]}`} subtitle="Here is your banking overview today." action={<Link to="/transfer" className="primary-button"><Plus size={17}/>New transfer</Link>}/>
+ <div className="grid gap-5 md:grid-cols-3"><Card className="bg-navy p-6 text-white"><div className="flex justify-between text-slate-300"><span>Total balance</span><WalletCards size={20}/></div><div className="mt-6 text-3xl font-bold">{money(total)}</div><div className="mt-6 text-xs text-slate-400">{accounts.length} active account{accounts.length!==1?'s':''}</div></Card><Stat title="Accounts" value={accounts.length} icon={WalletCards}/><Stat title="Recent transactions" value={transactions.length} icon={CreditCard}/></div>
+ <div className="mt-5 grid gap-5 xl:grid-cols-[1.5fr_1fr]"><Card className="p-6"><div className="mb-5 flex items-center justify-between"><h2 className="font-bold">Your accounts</h2><Link className="text-sm font-semibold text-blue" to="/accounts">View all</Link></div>{accounts.length?accounts.map(a=><div key={a.id} className="mb-3 flex items-center justify-between rounded-xl border border-slate-100 p-4"><div><div className="font-semibold">{a.account_type} Account</div><div className="mt-1 text-xs text-slate-500">•••• {a.account_number.slice(-4)}</div></div><div className="text-right"><div className="font-bold">{money(a.balance)}</div><div className="mt-1"><StatusBadge status={a.status}/></div></div></div>):<EmptyState title="No accounts yet" message="Create an account to get started."/>}</Card><Card className="p-6"><h2 className="font-bold">Quick actions</h2><div className="mt-5 grid grid-cols-2 gap-3"><Quick to="/transfer" icon={ArrowUpRight} label="Transfer"/><Quick to="/beneficiaries" icon={Users} label="Beneficiaries"/><Quick to="/transactions" icon={ArrowDownLeft} label="History"/><Quick to="/accounts" icon={Plus} label="Accounts"/></div></Card></div>
+ <Card className="mt-5 overflow-hidden"><div className="border-b px-6 py-5 flex justify-between"><h2 className="font-bold">Recent transactions</h2><Link className="text-sm font-semibold text-blue" to="/transactions">View history</Link></div>{transactions.length?<div className="divide-y">{transactions.map(t=><div key={t.id} className="flex items-center justify-between px-6 py-4"><div><div className="font-semibold">{t.reference}</div><div className="mt-1 text-xs text-slate-500">{dateTime(t.created_at)}</div></div><div className="text-right"><div className="font-bold">{money(t.amount)}</div><StatusBadge status={t.status}/></div></div>)}</div>:<EmptyState title="No transactions" message="Your recent activity will appear here."/>}</Card></>
+}
+function Stat({title,value,icon:Icon}){return <Card className="p-6"><div className="flex justify-between"><div><div className="text-sm text-slate-500">{title}</div><div className="mt-3 text-3xl font-bold">{value}</div></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue"><Icon/></span></div></Card>}
+function Quick({to,icon:Icon,label}){return <Link to={to} className="flex min-h-24 flex-col items-center justify-center rounded-xl border border-slate-200 text-sm font-semibold hover:border-blue"><Icon className="mb-2 text-blue" size={22}/>{label}</Link>}
