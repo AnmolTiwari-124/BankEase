@@ -1,4 +1,3 @@
-
 """
 Django settings for config project.
 """
@@ -20,11 +19,17 @@ load_dotenv(BASE_DIR / ".env")
 # =========================================================
 
 SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "bankease-development-secret-key-that-is-at-least-64-characters-long-for-safe-local-signing",
+    "SECRET_KEY",
+    os.getenv(
+        "DJANGO_SECRET_KEY",
+        "bankease-development-secret-key-that-is-at-least-64-characters-long-for-safe-local-signing",
+    ),
 )
 
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
+DEBUG = os.getenv(
+    "DEBUG",
+    os.getenv("DJANGO_DEBUG", "False"),
+).lower() == "true"
 
 ALLOWED_HOSTS = [
     host.strip()
