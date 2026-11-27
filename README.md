@@ -1,7 +1,4 @@
 # BankEase – NextGen Net Banking Application
-
-Phase 1 provides the complete Django REST backend. It is an educational banking simulation; no real bank or financial system is connected.
-
 ## Architecture
 
 - `backend/config/`: Django settings and root routing
@@ -14,7 +11,6 @@ Phase 1 provides the complete Django REST backend. It is an educational banking 
 - `backend/core/`: shared permissions, pagination, response helpers
 
 ## Local setup
-
 ```powershell
 cd "C:\Users\91844\Desktop\BankEase"
 py -m venv .venv
@@ -28,7 +24,6 @@ py manage.py runserver
 ```
 
 SQLite is used by default. PostgreSQL is selected by setting `DB_ENGINE=postgresql` and the `DB_*` environment variables.
-
 ## API summary
 
 - `/api/auth/register/` POST
@@ -77,3 +72,4 @@ The suite covers registration, login, refresh, profile, password change, logout,
 
 - The admin and customer APIs use the simulated in-system account balance and do not connect to external banking providers.
 - Gunicorn is for Linux/Unix production hosting; use a compatible production server on Windows.
+  
